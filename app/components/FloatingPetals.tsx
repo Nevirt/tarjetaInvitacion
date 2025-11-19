@@ -109,6 +109,8 @@ export default function FloatingPetals() {
               position: 'absolute',
               width: `${petal.size}px`,
               height: `${petal.size}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
           >
             {/* Pétalo SVG con forma variada */}

@@ -21,13 +21,13 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   useEffect(() => {
-    const elements: FloatingElement[] = Array.from({ length: 10 }, (_, i) => ({
+    const elements: FloatingElement[] = Array.from({ length: 6 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 3,
-      duration: 4 + Math.random() * 3,
-      size: 16 + Math.random() * 20,
+      duration: 5 + Math.random() * 3,
+      size: 18 + Math.random() * 22,
       emoji: '', // No longer needed
     }))
     setFloatingElements(elements)
@@ -48,6 +48,8 @@ export default function Footer() {
               top: `${element.y}%`,
               width: `${element.size}px`,
               height: `${element.size}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
             animate={{
               y: [0, -20, 0],
@@ -58,7 +60,7 @@ export default function Footer() {
               duration: element.duration,
               delay: element.delay,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: 'linear',
             }}
           >
             {shapeType === 0 && (

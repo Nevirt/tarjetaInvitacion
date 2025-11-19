@@ -29,21 +29,22 @@ export default function GeometricBackground({
   const [shapes, setShapes] = useState<GeometricShape[]>([])
 
   useEffect(() => {
-    const shapeCount = density === 'low' ? 10 : density === 'medium' ? 16 : 22
+    // Reducir cantidad moderadamente para fluidez
+    const shapeCount = density === 'low' ? 6 : density === 'medium' ? 10 : 14
     const types: GeometricShape['type'][] = [
       'hexagon', 'hexagon-outline', 'hexagon-nested', 'circle', 'triangle', 'lines'
     ]
     
     const generatedShapes: GeometricShape[] = Array.from({ length: shapeCount }, (_, i) => ({
       id: i,
-      x: -5 + Math.random() * 110, // Permite que salgan un poco del borde
+      x: -5 + Math.random() * 110,
       y: -5 + Math.random() * 110,
-      size: 80 + Math.random() * 180, // Tamaños aún más grandes
+      size: 100 + Math.random() * 150, // Tamaños optimizados
       delay: Math.random() * 3,
-      duration: 20 + Math.random() * 20, // Más lento para más sutileza
+      duration: 25 + Math.random() * 20, // Animaciones más suaves y lentas
       rotation: Math.random() * 360,
       type: types[Math.floor(Math.random() * types.length)],
-      opacity: 0.15 + Math.random() * 0.25, // MUCHO más visible
+      opacity: 0.2 + Math.random() * 0.3,
     }))
     
     setShapes(generatedShapes)
@@ -245,6 +246,9 @@ export default function GeometricBackground({
             top: `${shape.y}%`,
             width: `${shape.size}px`,
             height: `${shape.size}px`,
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
           }}
           initial={{
             rotate: shape.rotation,
@@ -252,15 +256,16 @@ export default function GeometricBackground({
           }}
           animate={{
             rotate: [shape.rotation, shape.rotation + 360],
-            opacity: [0.3, 0.6, 1, 0.8, 0.3],
-            y: [0, -40, -80, -120],
-            scale: [0.7, 1, 1.05, 0.9],
+            opacity: [0.3, 0.7, 1, 0.7, 0.3],
+            y: [0, -30, -60, -90],
+            scale: [0.8, 1, 0.95],
           }}
           transition={{
             duration: shape.duration,
             delay: shape.delay,
             repeat: Infinity,
-            ease: 'easeInOut',
+            ease: 'linear',
+            times: [0, 0.33, 0.66, 1],
           }}
         >
           {renderShape(shape, index)}

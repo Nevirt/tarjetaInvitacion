@@ -186,6 +186,8 @@ export default function FloatingParticles() {
               marginLeft: `-${particle.size / 2}px`,
               marginTop: `-${particle.size / 2}px`,
               filter: `drop-shadow(0 0 ${particle.size / 2}px ${colors.glow})`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
           >
             {getParticleShape(particle.type, particle.id)}

@@ -22,14 +22,14 @@ export default function LocationSection() {
   const [isHoveringMap, setIsHoveringMap] = useState(false)
 
   useEffect(() => {
-    const elements: FloatingIcon[] = Array.from({ length: 12 }, (_, i) => ({
+    const elements: FloatingIcon[] = Array.from({ length: 8 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 4,
-      duration: 4 + Math.random() * 4,
+      duration: 5 + Math.random() * 4,
       icon: '', // No longer needed
-      size: 20 + Math.random() * 30,
+      size: 22 + Math.random() * 28,
     }))
     setFloatingIcons(elements)
   }, [])
@@ -62,6 +62,8 @@ export default function LocationSection() {
               top: `${element.y}%`,
               width: `${element.size}px`,
               height: `${element.size}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
             animate={{
               y: [0, -40, 0],
@@ -72,7 +74,7 @@ export default function LocationSection() {
               duration: element.duration,
               delay: element.delay,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: 'linear',
             }}
           >
             {shapeType === 0 && (

@@ -39,13 +39,13 @@ export default function RsvpSection() {
   const [errors, setErrors] = useState<Partial<RsvpFormData>>({})
 
   useEffect(() => {
-    const hearts: FloatingHeart[] = Array.from({ length: 15 }, (_, i) => ({
+    const hearts: FloatingHeart[] = Array.from({ length: 10 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 5,
-      duration: 5 + Math.random() * 5,
-      size: 20 + Math.random() * 30,
+      duration: 6 + Math.random() * 4,
+      size: 22 + Math.random() * 28,
       emoji: '', // No longer needed
     }))
     setFloatingHearts(hearts)
@@ -139,6 +139,8 @@ export default function RsvpSection() {
                 top: `${heart.y}%`,
                 width: `${heart.size}px`,
                 height: `${heart.size}px`,
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
               }}
               animate={{
                 y: [0, -50, 0],
@@ -150,7 +152,7 @@ export default function RsvpSection() {
                 duration: heart.duration,
                 delay: heart.delay,
                 repeat: Infinity,
-                ease: 'easeInOut',
+                ease: 'linear',
               }}
             >
               {shapeType === 0 && (

@@ -46,13 +46,13 @@ export default function AnimatedGoldenFrame({
     : [{ src: images, alt: imageAlt || 'Foto especial' }]
 
   useEffect(() => {
-    const particles: GlitterParticle[] = Array.from({ length: 8 }, (_, i) => ({
+    const particles: GlitterParticle[] = Array.from({ length: 5 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 2,
-      duration: 2 + Math.random() * 2,
-      size: 4 + Math.random() * 8,
+      duration: 2.5 + Math.random() * 1.5,
+      size: 5 + Math.random() * 8,
     }))
     setGlitterParticles(particles)
   }, [])
@@ -142,7 +142,7 @@ export default function AnimatedGoldenFrame({
         />
 
         {/* Glitter particles floating */}
-        {glitterParticles.slice(0, 6).map((particle) => (
+        {glitterParticles.map((particle) => (
           <motion.div
             key={particle.id}
             className="absolute pointer-events-none"
@@ -151,6 +151,8 @@ export default function AnimatedGoldenFrame({
               top: `${particle.y}%`,
               width: `${particle.size}px`,
               height: `${particle.size}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
             animate={{
               opacity: [0, 0.6, 0],
@@ -161,7 +163,7 @@ export default function AnimatedGoldenFrame({
               duration: particle.duration,
               delay: particle.delay,
               repeat: Infinity,
-              ease: 'easeOut',
+              ease: 'linear',
             }}
           >
             <div 

@@ -81,6 +81,8 @@ export default function GoldenGlitter() {
               height: `${particle.size}px`,
               marginLeft: `-${particle.size / 2}px`,
               marginTop: `-${particle.size / 2}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
           >
             {/* Partícula de brillo dorado */}

@@ -23,13 +23,13 @@ export default function DressCode() {
   const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
-    const elements: FloatingElement[] = Array.from({ length: 15 }, (_, i) => ({
+    const elements: FloatingElement[] = Array.from({ length: 8 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 3,
-      duration: 3 + Math.random() * 3,
-      size: 8 + Math.random() * 16,
+      duration: 4 + Math.random() * 3,
+      size: 10 + Math.random() * 18,
       rotation: Math.random() * 360,
     }))
     setFloatingElements(elements)
@@ -59,6 +59,8 @@ export default function DressCode() {
               top: `${element.y}%`,
               width: `${element.size}px`,
               height: `${element.size}px`,
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
             }}
             animate={{
               y: [0, -30, 0],
@@ -70,7 +72,7 @@ export default function DressCode() {
               duration: element.duration,
               delay: element.delay,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: 'linear',
             }}
           >
             {shapeType === 0 && (
