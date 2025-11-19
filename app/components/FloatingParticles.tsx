@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 
 interface Particle {
   id: number
@@ -14,12 +14,16 @@ interface Particle {
   direction: number
 }
 
-export default function FloatingParticles() {
+function FloatingParticlesComponent() {
   const [particles, setParticles] = useState<Particle[]>([])
 
   useEffect(() => {
+    // Detectar móviles para reducir carga (OPTIMIZACIÓN ChatGPT #6)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const particleCount = isMobile ? 25 : 50 // 50% menos en móvil
+    
     // Crear partículas decorativas variadas
-    const newParticles: Particle[] = Array.from({ length: 50 }, (_, i) => {
+    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => {
       const types: ('golden' | 'rose' | 'pearl' | 'sparkle')[] = ['golden', 'rose', 'pearl', 'sparkle']
       return {
         id: i,
@@ -185,9 +189,11 @@ export default function FloatingParticles() {
               height: `${particle.size}px`,
               marginLeft: `-${particle.size / 2}px`,
               marginTop: `-${particle.size / 2}px`,
-              filter: `drop-shadow(0 0 ${particle.size / 2}px ${colors.glow})`,
+              // Reducir drop-shadow costoso (OPTIMIZACIÓN ChatGPT #3)
+              filter: `drop-shadow(0 0 ${Math.min(particle.size / 3, 4)}px ${colors.glow})`,
               willChange: 'transform',
               backfaceVisibility: 'hidden',
+              transform: 'translate3d(0, 0, 0)', // GPU acceleration (OPTIMIZACIÓN ChatGPT #7)
             }}
           >
             {getParticleShape(particle.type, particle.id)}
@@ -197,4 +203,7 @@ export default function FloatingParticles() {
     </div>
   )
 }
+
+// React.memo para evitar re-renders innecesarios (OPTIMIZACIÓN ChatGPT #2)
+export default memo(FloatingParticlesComponent)
 

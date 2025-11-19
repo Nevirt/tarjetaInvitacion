@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 
 interface GlitterParticle {
   id: number
@@ -12,12 +12,16 @@ interface GlitterParticle {
   size: number
 }
 
-export default function GoldenGlitter() {
+function GoldenGlitterComponent() {
   const [particles, setParticles] = useState<GlitterParticle[]>([])
 
   useEffect(() => {
+    // Detectar móviles para reducir carga (OPTIMIZACIÓN ChatGPT #6)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const particleCount = isMobile ? 6 : 10 // 40% menos en móvil
+    
     // Crear partículas de brillo dorado
-    const newParticles: GlitterParticle[] = Array.from({ length: 10 }, (_, i) => ({
+    const newParticles: GlitterParticle[] = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100, // Posición X aleatoria
       y: Math.random() * 100, // Posición Y aleatoria
@@ -83,6 +87,7 @@ export default function GoldenGlitter() {
               marginTop: `-${particle.size / 2}px`,
               willChange: 'transform',
               backfaceVisibility: 'hidden',
+              transform: 'translate3d(0, 0, 0)', // GPU acceleration (OPTIMIZACIÓN ChatGPT #7)
             }}
           >
             {/* Partícula de brillo dorado */}
@@ -90,7 +95,7 @@ export default function GoldenGlitter() {
               width="100%"
               height="100%"
               viewBox="0 0 100 100"
-              style={{ filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 3px rgba(255, 165, 0, 0.6))' }}
+              style={{ filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.7))' }} // Reducir drop-shadow múltiple (OPTIMIZACIÓN ChatGPT #3)
             >
               <defs>
                 <radialGradient id={`glitterGradient-${particle.id}`}>
@@ -115,4 +120,7 @@ export default function GoldenGlitter() {
     </div>
   )
 }
+
+// React.memo para evitar re-renders innecesarios (OPTIMIZACIÓN ChatGPT #2)
+export default memo(GoldenGlitterComponent)
 

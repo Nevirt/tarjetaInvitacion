@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 
 interface GeometricShape {
   id: number
@@ -21,7 +21,7 @@ interface GeometricBackgroundProps {
   className?: string
 }
 
-export default function GeometricBackground({ 
+function GeometricBackgroundComponent({ 
   variant = 'mixed', 
   density = 'medium',
   className = ''
@@ -29,8 +29,14 @@ export default function GeometricBackground({
   const [shapes, setShapes] = useState<GeometricShape[]>([])
 
   useEffect(() => {
+    // Detectar móviles para reducir carga (OPTIMIZACIÓN ChatGPT #6)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    
     // Reducir cantidad moderadamente para fluidez
-    const shapeCount = density === 'low' ? 6 : density === 'medium' ? 10 : 14
+    let shapeCount = density === 'low' ? 6 : density === 'medium' ? 10 : 14
+    if (isMobile) {
+      shapeCount = Math.floor(shapeCount * 0.6) // 40% menos en móvil
+    }
     const types: GeometricShape['type'][] = [
       'hexagon', 'hexagon-outline', 'hexagon-nested', 'circle', 'triangle', 'lines'
     ]
@@ -277,4 +283,8 @@ export default function GeometricBackground({
     </div>
   )
 }
+
+// React.memo para evitar re-renders innecesarios (OPTIMIZACIÓN ChatGPT #2)
+const GeometricBackground = memo(GeometricBackgroundComponent)
+export default GeometricBackground
 

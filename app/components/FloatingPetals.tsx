@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 import { useWindowSize } from '../hooks/useWindowSize'
 
 interface Petal {
@@ -16,13 +16,17 @@ interface Petal {
   fallDistance: number // Distancia de caída guardada
 }
 
-export default function FloatingPetals() {
+function FloatingPetalsComponent() {
   const [petals, setPetals] = useState<Petal[]>([])
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   useEffect(() => {
+    // Detectar móviles para reducir carga (OPTIMIZACIÓN ChatGPT #6)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const petalCount = isMobile ? 12 : 20 // 40% menos en móvil
+    
     // Crear múltiples pétalos con propiedades aleatorias
-    const newPetals: Petal[] = Array.from({ length: 20 }, (_, i) => ({
+    const newPetals: Petal[] = Array.from({ length: petalCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100, // Posición inicial X aleatoria (0-100%)
       y: -10 - Math.random() * 20, // Empiezan arriba de la pantalla
@@ -111,6 +115,7 @@ export default function FloatingPetals() {
               height: `${petal.size}px`,
               willChange: 'transform',
               backfaceVisibility: 'hidden',
+              transform: 'translate3d(0, 0, 0)', // GPU acceleration (OPTIMIZACIÓN ChatGPT #7)
             }}
           >
             {/* Pétalo SVG con forma variada */}
@@ -118,7 +123,7 @@ export default function FloatingPetals() {
               width="100%"
               height="100%"
               viewBox="0 0 100 100"
-              style={{ filter: 'drop-shadow(0 2px 6px rgba(232,184,176,0.3))' }}
+              style={{ filter: 'drop-shadow(0 1px 3px rgba(232,184,176,0.25))' }} // Reducir drop-shadow (OPTIMIZACIÓN ChatGPT #3)
             >
               <defs>
                 <linearGradient id={`petalGradient-${petal.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -135,4 +140,7 @@ export default function FloatingPetals() {
     </div>
   )
 }
+
+// React.memo para evitar re-renders innecesarios (OPTIMIZACIÓN ChatGPT #2)
+export default memo(FloatingPetalsComponent)
 
