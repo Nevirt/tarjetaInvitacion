@@ -51,7 +51,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[350px] h-[350px] sm:w-[500px] sm:h-[500px] md:w-[700px] md:h-[700px] lg:w-[900px] lg:h-[900px]"
+          className="relative w-[420px] h-[420px] sm:w-[580px] sm:h-[580px] md:w-[800px] md:h-[800px] lg:w-[1000px] lg:h-[1000px]"
           animate={{
             y: [0, -15, 0],
             rotate: [0, 2, 0],
@@ -77,13 +77,13 @@ function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Flor 2: Esquina inferior derecha - Rama dorada elegante */}
+      {/* Flor 2: Esquina inferior izquierda - Rama dorada elegante (volteada) */}
       <motion.div
-        className="absolute -bottom-12 -right-12 sm:-bottom-16 sm:-right-16 md:-bottom-32 md:-right-32 lg:-bottom-40 lg:-right-40 pointer-events-none z-[30]"
-        initial={{ opacity: 0, x: 120, y: 80, rotate: 18 }}
+        className="absolute -bottom-12 -left-12 sm:-bottom-16 sm:-left-16 md:-bottom-32 md:-left-32 lg:-bottom-40 lg:-left-40 pointer-events-none z-[30]"
+        initial={{ opacity: 0, x: -120, y: 80, rotate: -18 }}
         animate={{
           opacity: 1,
-          x: 30,
+          x: -30,
           y: 0,
           rotate: 0,
         }}
@@ -95,10 +95,10 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[500px] md:h-[500px] lg:w-[650px] lg:h-[650px]"
+          className="relative w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] md:w-[580px] md:h-[580px] lg:w-[750px] lg:h-[750px]"
           animate={{
             y: [0, 18, 0],
-            rotate: [0, -4, 0],
+            rotate: [0, 4, 0],
           }}
           transition={{
             duration: 12,
@@ -110,7 +110,7 @@ function Hero() {
             src="/hero-flower-2.png"
             alt="Rama decorativa"
             fill
-            className="object-contain"
+            className="object-contain transform scale-x-[-1]"
             style={{
               opacity: 1,
               filter: 'drop-shadow(0 10px 30px rgba(212,175,55,0.18))',
@@ -140,7 +140,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[650px] md:h-[650px] lg:w-[800px] lg:h-[800px]"
+          className="relative w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] md:w-[750px] md:h-[750px] lg:w-[900px] lg:h-[900px]"
           animate={{
             y: [0, -20, 0],
             rotate: [0, -3, 0],
