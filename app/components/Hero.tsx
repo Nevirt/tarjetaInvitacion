@@ -40,7 +40,7 @@ function Hero() {
         initial={{ opacity: 0, x: -150, y: -100, rotate: -20 }}
         animate={{
           opacity: 1,
-          x: -40,
+          x: -20,
           y: 20,
           rotate: 0,
         }}
@@ -51,7 +51,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[520px] h-[520px] sm:w-[680px] sm:h-[680px] md:w-[900px] md:h-[900px] lg:w-[1100px] lg:h-[1100px]"
+          className="relative w-[470px] h-[470px] sm:w-[630px] sm:h-[630px] md:w-[850px] md:h-[850px] lg:w-[1050px] lg:h-[1050px]"
           animate={{
             y: [0, -15, 0],
             rotate: [0, 2, 0],
