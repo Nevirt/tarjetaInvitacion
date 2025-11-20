@@ -171,5 +171,10 @@
   .float-golden {
     animation: float-golden 4s ease-in-out infinite;
   }
+  
+  /* Gradiente radial para overlays suaves */
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }
 }
 

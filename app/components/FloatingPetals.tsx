@@ -41,7 +41,7 @@ function FloatingPetalsComponent() {
   }, [])
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[16] overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[25] overflow-hidden">
       {petals.map((petal) => {
         // Variaciones de formas de pétalos
         const petalTypes = [

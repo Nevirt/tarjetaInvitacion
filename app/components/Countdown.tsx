@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { invitacionConfig } from '../config/invitacion'
 import GeometricBackground from './GeometricBackground'
 
@@ -161,16 +162,86 @@ export default function Countdown() {
     <motion.section
       id="countdown"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 1, ease: "easeOut" }}
       className="py-16 px-4 bg-gradient-to-b from-paper to-rose/30 relative overflow-hidden"
     >
       <GeometricBackground variant="rose" density="medium" />
+      
+      {/* Imagen decorativa esquina superior izquierda */}
+      <motion.div 
+        className="absolute -top-6 left-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        initial={{ opacity: 0, x: -50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{
+          duration: 1,
+          ease: "easeOut"
+        }}
+      >
+        <motion.div
+          style={{ transformOrigin: "top left" }}
+          animate={{ 
+            rotate: [0, 3, 0],
+            y: [0, 2, 0]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <Image
+            src="/floral-branch.png"
+            alt=""
+            width={320}
+            height={320}
+            className="w-full h-auto"
+          />
+        </motion.div>
+      </motion.div>
+      
+      {/* Imagen decorativa esquina superior derecha (volteada) */}
+      <motion.div 
+        className="absolute -top-6 right-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        initial={{ opacity: 0, x: 50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{
+          duration: 1,
+          ease: "easeOut"
+        }}
+      >
+        <motion.div
+          style={{ transformOrigin: "top right" }}
+          animate={{ 
+            rotate: [0, -3, 0],
+            y: [0, 2, 0]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5
+          }}
+        >
+          <Image
+            src="/floral-branch.png"
+            alt=""
+            width={320}
+            height={320}
+            className="w-full h-auto transform scale-x-[-1]"
+          />
+        </motion.div>
+      </motion.div>
+      
       <div className="max-w-6xl mx-auto text-center relative z-10">
         {isExpired ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className="text-3xl md:text-5xl font-script text-accent-rose py-12"
           >
             {config.countdownExpiredMessage}
@@ -179,20 +250,34 @@ export default function Countdown() {
           <>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               className="text-3xl md:text-4xl font-serif text-text-primary mb-12"
             >
               Cuenta Regresiva
             </motion.h2>
-            <div className="flex justify-center items-stretch gap-3 md:gap-6 mb-8 w-full max-w-4xl mx-auto">
+            <motion.div 
+              className="flex justify-center items-stretch gap-3 md:gap-6 mb-8 w-full max-w-4xl mx-auto"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            >
               <AnimatedNumber value={timeLeft.days} label="Días" />
               <AnimatedNumber value={timeLeft.hours} label="Horas" isHighlighted />
               <AnimatedNumber value={timeLeft.minutes} label="Minutos" />
               <AnimatedNumber value={timeLeft.seconds} label="Segundos" />
-            </div>
+            </motion.div>
             {/* Cuenta regresiva para confirmación de asistencia */}
-            <RsvpCountdown />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            >
+              <RsvpCountdown />
+            </motion.div>
           </>
         )}
       </div>

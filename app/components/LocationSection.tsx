@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { invitacionConfig } from '../config/invitacion'
 import Section from './Section'
 import GeometricBackground from './GeometricBackground'
@@ -50,6 +51,74 @@ export default function LocationSection() {
   return (
     <Section id="location" className="bg-gradient-to-b from-white/50 via-[#FFF5E8]/40 to-white/50 py-16 md:py-24 relative overflow-hidden">
       <GeometricBackground variant="sepia" density="medium" />
+      
+      {/* Imagen decorativa esquina superior izquierda */}
+      <motion.div 
+        className="absolute -top-6 left-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        initial={{ opacity: 0, x: -50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{
+          duration: 1,
+          ease: "easeOut"
+        }}
+      >
+        <motion.div
+          style={{ transformOrigin: "top left" }}
+          animate={{ 
+            rotate: [0, 3, 0],
+            y: [0, 2, 0]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <Image
+            src="/floral-branch.png"
+            alt=""
+            width={320}
+            height={320}
+            className="w-full h-auto"
+          />
+        </motion.div>
+      </motion.div>
+      
+      {/* Imagen decorativa esquina superior derecha (volteada) */}
+      <motion.div 
+        className="absolute -top-6 right-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        initial={{ opacity: 0, x: 50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{
+          duration: 1,
+          ease: "easeOut"
+        }}
+      >
+        <motion.div
+          style={{ transformOrigin: "top right" }}
+          animate={{ 
+            rotate: [0, -3, 0],
+            y: [0, 2, 0]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5
+          }}
+        >
+          <Image
+            src="/floral-branch.png"
+            alt=""
+            width={320}
+            height={320}
+            className="w-full h-auto transform scale-x-[-1]"
+          />
+        </motion.div>
+      </motion.div>
+      
       {/* Floating geometric shapes decorative */}
       {floatingIcons.map((element, index) => {
         const shapeType = index % 5

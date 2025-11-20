@@ -25,13 +25,20 @@ export default function Home() {
       <FloatingPetals />
       <GoldenGlitter />
       <FloatingParticles />
-      
+
       <Hero />
+
       <Countdown />
+
       <Acknowledgements />
+
       <DressCode />
+
       <LocationSection />
+
       <RsvpSection />
+
+      {/* Footer - sin decoraciones */}
       <Footer />
     </main>
   )
