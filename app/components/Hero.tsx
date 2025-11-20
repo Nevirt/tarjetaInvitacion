@@ -40,8 +40,8 @@ function Hero() {
         initial={{ opacity: 0, x: -150, y: -100, rotate: -20 }}
         animate={{
           opacity: 1,
-          x: -60,
-          y: -10,
+          x: -40,
+          y: 20,
           rotate: 0,
         }}
         transition={{
@@ -51,7 +51,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[620px] h-[620px] sm:w-[780px] sm:h-[780px] md:w-[1000px] md:h-[1000px] lg:w-[1200px] lg:h-[1200px]"
+          className="relative w-[520px] h-[520px] sm:w-[680px] sm:h-[680px] md:w-[900px] md:h-[900px] lg:w-[1100px] lg:h-[1100px]"
           animate={{
             y: [0, -15, 0],
             rotate: [0, 2, 0],
@@ -127,8 +127,8 @@ function Hero() {
         initial={{ opacity: 0, x: 150, y: -80, rotate: 20, scale: 0.7 }}
         animate={{
           opacity: 1,
-          x: 30,
-          y: -100,
+          x: 15,
+          y: -80,
           rotate: 0,
           scale: 1,
         }}
@@ -140,7 +140,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[410px] h-[410px] sm:w-[570px] sm:h-[570px] md:w-[800px] md:h-[800px] lg:w-[950px] lg:h-[950px]"
+          className="relative w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] md:w-[750px] md:h-[750px] lg:w-[900px] lg:h-[900px]"
           animate={{
             y: [0, -10, 0],
             rotate: [0, -3, 0],
