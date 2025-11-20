@@ -54,7 +54,7 @@ export default function LocationSection() {
       
       {/* Imagen decorativa esquina superior izquierda */}
       <motion.div 
-        className="absolute -top-6 left-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        className="absolute -top-6 left-0 w-48 md:w-64 lg:w-80 z-10 pointer-events-none"
         initial={{ opacity: 0, x: -50 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, amount: 0.2 }}
@@ -87,7 +87,7 @@ export default function LocationSection() {
       
       {/* Imagen decorativa esquina superior derecha (volteada) */}
       <motion.div 
-        className="absolute -top-6 right-0 w-60 md:w-64 lg:w-80 z-10 pointer-events-none"
+        className="absolute -top-6 right-0 w-48 md:w-64 lg:w-80 z-10 pointer-events-none"
         initial={{ opacity: 0, x: 50 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, amount: 0.2 }}

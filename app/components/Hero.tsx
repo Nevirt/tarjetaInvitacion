@@ -24,7 +24,7 @@ function Hero() {
   const minutes = eventDate.getMinutes().toString().padStart(2, '0')
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#FFF9F0] to-[#FAF7F2]">
+    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#FFF9F0] to-[#FAF7F2]">
 
       {/* Efecto de burbujas/humo etéreo de fondo */}
       <FloatingBubbles />
@@ -36,7 +36,7 @@ function Hero() {
 
       {/* Flor 1: Esquina superior izquierda - EXTRA GRANDE como marco decorativo */}
       <motion.div
-        className="absolute -top-32 -left-32 md:-top-48 md:-left-48 lg:-top-56 lg:-left-56 pointer-events-none z-[30]"
+        className="absolute -top-20 -left-20 sm:-top-32 sm:-left-32 md:-top-48 md:-left-48 lg:-top-56 lg:-left-56 pointer-events-none z-[30]"
         initial={{ opacity: 0, x: -150, y: -100, rotate: -20 }}
         animate={{
           opacity: 1,
@@ -51,7 +51,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[600px] h-[600px] md:w-[900px] md:h-[900px] lg:w-[1100px] lg:h-[1100px]"
+          className="relative w-[350px] h-[350px] sm:w-[500px] sm:h-[500px] md:w-[700px] md:h-[700px] lg:w-[900px] lg:h-[900px]"
           animate={{
             y: [0, -15, 0],
             rotate: [0, 2, 0],
@@ -79,11 +79,11 @@ function Hero() {
 
       {/* Flor 2: Esquina inferior derecha - Rama dorada elegante */}
       <motion.div
-        className="absolute -bottom-16 -right-16 md:-bottom-32 md:-right-32 lg:-bottom-40 lg:-right-40 pointer-events-none z-[30]"
+        className="absolute -bottom-12 -right-12 sm:-bottom-16 sm:-right-16 md:-bottom-32 md:-right-32 lg:-bottom-40 lg:-right-40 pointer-events-none z-[30]"
         initial={{ opacity: 0, x: 120, y: 80, rotate: 18 }}
         animate={{
           opacity: 1,
-          x: 50,
+          x: 30,
           y: 0,
           rotate: 0,
         }}
@@ -95,7 +95,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[375px] h-[375px] md:w-[575px] md:h-[575px] lg:w-[725px] lg:h-[725px]"
+          className="relative w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[500px] md:h-[500px] lg:w-[650px] lg:h-[650px]"
           animate={{
             y: [0, 18, 0],
             rotate: [0, -4, 0],
@@ -123,12 +123,12 @@ function Hero() {
 
       {/* Flor 3: Esquina superior derecha - Composición floral aesthetic */}
       <motion.div
-        className="absolute -top-24 -right-24 md:-top-40 md:-right-40 lg:-top-48 lg:-right-48 pointer-events-none z-[30]"
+        className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 md:-top-40 md:-right-40 lg:-top-48 lg:-right-48 pointer-events-none z-[30]"
         initial={{ opacity: 0, x: 150, y: -80, rotate: 20, scale: 0.7 }}
         animate={{
           opacity: 1,
           x: 0,
-          y: -80,
+          y: -50,
           rotate: 0,
           scale: 1,
         }}
@@ -140,7 +140,7 @@ function Hero() {
         }}
       >
         <motion.div
-          className="relative w-[500px] h-[500px] md:w-[750px] md:h-[750px] lg:w-[900px] lg:h-[900px]"
+          className="relative w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[650px] md:h-[650px] lg:w-[800px] lg:h-[800px]"
           animate={{
             y: [0, -20, 0],
             rotate: [0, -3, 0],
@@ -169,7 +169,7 @@ function Hero() {
 
       {/* Imagen division dorado */}
       <motion.div 
-        className="absolute -bottom-20 middle-center  w-80 md:w-96 lg:w-[30rem] z-10 pointer-events-none"
+        className="absolute -bottom-16 sm:-bottom-20 middle-center w-64 sm:w-80 md:w-96 lg:w-[30rem] z-10 pointer-events-none"
         initial={{ opacity: 0, y: 20 }}
         animate={{ 
           opacity: 1, 
@@ -200,11 +200,11 @@ function Hero() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
-        className="relative z-20 text-center px-4 py-20 max-w-5xl mx-auto"
+        className="relative z-20 text-center px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-20 max-w-5xl mx-auto w-full"
       >
         {/* Marco dorado elegante con animación */}
         <motion.div
-          className="absolute inset-8 md:inset-12 pointer-events-none"
+          className="absolute inset-4 sm:inset-6 md:inset-12 pointer-events-none"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.8 }}
@@ -262,7 +262,7 @@ function Hero() {
           {/* Esquinas decorativas con detalles dorados */}
           {/* Esquina superior izquierda */}
           <motion.div
-            className="absolute -top-1 -left-1 w-16 h-16"
+            className="absolute -top-1 -left-1 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
@@ -286,7 +286,7 @@ function Hero() {
 
           {/* Esquina superior derecha */}
           <motion.div
-            className="absolute -top-1 -right-1 w-16 h-16"
+            className="absolute -top-1 -right-1 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.4 }}
@@ -310,7 +310,7 @@ function Hero() {
 
           {/* Esquina inferior izquierda */}
           <motion.div
-            className="absolute -bottom-1 -left-1 w-16 h-16"
+            className="absolute -bottom-1 -left-1 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.5 }}
@@ -334,7 +334,7 @@ function Hero() {
 
           {/* Esquina inferior derecha */}
           <motion.div
-            className="absolute -bottom-1 -right-1 w-16 h-16"
+            className="absolute -bottom-1 -right-1 w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.6 }}
@@ -415,7 +415,7 @@ function Hero() {
         </motion.div>
         {/* Fondo sutil para el contenido dentro del marco */}
         <motion.div
-          className="absolute inset-12 md:inset-16 bg-white/30 backdrop-blur-sm rounded-lg -z-10"
+          className="absolute inset-6 sm:inset-8 md:inset-12 lg:inset-16 bg-white/30 backdrop-blur-sm rounded-lg -z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.0 }}
@@ -426,7 +426,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="text-2xl md:text-3xl font-serif text-text-primary mb-8 tracking-wide"
+          className="text-xl sm:text-2xl md:text-3xl font-serif text-text-primary mb-6 sm:mb-8 tracking-wide"
         >
           {config.eventTitle}
         </motion.div>
@@ -436,7 +436,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="text-6xl md:text-8xl lg:text-9xl font-script mb-12 leading-tight golden-shine golden-glow relative"
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-script mb-8 sm:mb-10 md:mb-12 leading-tight golden-shine golden-glow relative px-2"
         >
           {config.honoreeName}
         </motion.h1>
@@ -446,7 +446,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0, duration: 0.6 }}
-          className="text-lg md:text-xl font-serif text-text-secondary mb-12 tracking-wide"
+          className="text-base sm:text-lg md:text-xl font-serif text-text-secondary mb-8 sm:mb-10 md:mb-12 tracking-wide px-2"
         >
           Acompáñanos a celebrar este día especial
         </motion.div>
@@ -456,26 +456,26 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1, duration: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-3 md:gap-6 mb-8"
+          className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-6 mb-6 sm:mb-8 px-2"
         >
           {/* Día - Número grande con brillo dorado */}
-          <div className="text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
+          <div className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
             {day}
           </div>
 
           {/* Separador vertical con brillo */}
-          <div className="h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
+          <div className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
 
           {/* Mes - Script elegante con brillo dorado */}
-          <div className="text-4xl md:text-6xl font-script golden-shine golden-glow">
+          <div className="text-3xl sm:text-4xl md:text-6xl font-script golden-shine golden-glow">
             {month}
           </div>
 
           {/* Separador vertical con brillo */}
-          <div className="h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
+          <div className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
 
           {/* Año - Número grande con brillo dorado */}
-          <div className="text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
+          <div className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
             {year}
           </div>
         </motion.div>
@@ -485,15 +485,15 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className="space-y-2"
+          className="space-y-2 px-2"
         >
-          <div className="text-3xl md:text-5xl font-serif font-semibold mb-2 golden-shine golden-glow">
+          <div className="text-2xl sm:text-3xl md:text-5xl font-serif font-semibold mb-2 golden-shine golden-glow">
             {hours}:{minutes} HS.
           </div>
-          <div className="text-base md:text-lg font-sans text-text-secondary">
+          <div className="text-sm sm:text-base md:text-lg font-sans text-text-secondary">
             {config.eventLocationName}
           </div>
-          <div className="text-sm md:text-base font-sans text-text-secondary">
+          <div className="text-xs sm:text-sm md:text-base font-sans text-text-secondary">
             {config.eventAddress}
           </div>
         </motion.div>
