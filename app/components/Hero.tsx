@@ -61,6 +61,10 @@ function Hero() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
+          style={{
+            willChange: 'transform',
+            transform: 'translate3d(0, 0, 0)',
+          }}
         >
           <Image
             src="/hero-flower-1.png"
@@ -70,6 +74,7 @@ function Hero() {
             style={{
               opacity: 1,
               filter: 'drop-shadow(0 12px 35px rgba(0,0,0,0.12))',
+              willChange: 'transform',
             }}
             priority
             unoptimized
@@ -105,6 +110,10 @@ function Hero() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
+          style={{
+            willChange: 'transform',
+            transform: 'translate3d(0, 0, 0)',
+          }}
         >
           <Image
             src="/hero-flower-2.png"
@@ -114,6 +123,7 @@ function Hero() {
             style={{
               opacity: 1,
               filter: 'drop-shadow(0 10px 30px rgba(212,175,55,0.18))',
+              willChange: 'transform',
             }}
             priority
             unoptimized
@@ -151,6 +161,10 @@ function Hero() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
+          style={{
+            willChange: 'transform',
+            transform: 'translate3d(0, 0, 0)',
+          }}
         >
           <Image
             src="/hero-flower-3.png"
@@ -160,6 +174,7 @@ function Hero() {
             style={{
               opacity: 1,
               filter: 'drop-shadow(0 10px 28px rgba(212,175,55,0.12))',
+              willChange: 'transform',
             }}
             priority
             unoptimized

@@ -64,7 +64,11 @@ export default function LocationSection() {
         }}
       >
         <motion.div
-          style={{ transformOrigin: "top left" }}
+          style={{ 
+            transformOrigin: "top left",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
           animate={{ 
             rotate: [0, 3, 0],
             y: [0, 2, 0]
@@ -81,6 +85,7 @@ export default function LocationSection() {
             width={320}
             height={320}
             className="w-full h-auto"
+            loading="lazy"
           />
         </motion.div>
       </motion.div>
@@ -97,7 +102,11 @@ export default function LocationSection() {
         }}
       >
         <motion.div
-          style={{ transformOrigin: "top right" }}
+          style={{ 
+            transformOrigin: "top right",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
           animate={{ 
             rotate: [0, -3, 0],
             y: [0, 2, 0]
@@ -115,6 +124,7 @@ export default function LocationSection() {
             width={320}
             height={320}
             className="w-full h-auto transform scale-x-[-1]"
+            loading="lazy"
           />
         </motion.div>
       </motion.div>

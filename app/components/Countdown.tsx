@@ -163,7 +163,7 @@ export default function Countdown() {
       id="countdown"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.2, margin: "0px 0px -100px 0px" }}
       transition={{ duration: 1, ease: "easeOut" }}
       className="py-16 px-4 bg-gradient-to-b from-paper to-rose/30 relative overflow-hidden"
     >
@@ -181,7 +181,11 @@ export default function Countdown() {
         }}
       >
         <motion.div
-          style={{ transformOrigin: "top left" }}
+          style={{ 
+            transformOrigin: "top left",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
           animate={{ 
             rotate: [0, 3, 0],
             y: [0, 2, 0]
@@ -198,6 +202,7 @@ export default function Countdown() {
             width={320}
             height={320}
             className="w-full h-auto"
+            loading="lazy"
           />
         </motion.div>
       </motion.div>
@@ -214,7 +219,11 @@ export default function Countdown() {
         }}
       >
         <motion.div
-          style={{ transformOrigin: "top right" }}
+          style={{ 
+            transformOrigin: "top right",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
           animate={{ 
             rotate: [0, -3, 0],
             y: [0, 2, 0]
@@ -232,6 +241,7 @@ export default function Countdown() {
             width={320}
             height={320}
             className="w-full h-auto transform scale-x-[-1]"
+            loading="lazy"
           />
         </motion.div>
       </motion.div>
