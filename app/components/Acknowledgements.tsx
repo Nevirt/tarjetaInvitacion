@@ -101,30 +101,17 @@ export default function Acknowledgements() {
           {config.acknowledgementsTitle}
         </motion.h2>
 
-        {/* Agradecimientos especiales con marcos aesthetic scrapbook */}
+        {/* Agradecimientos especiales con marcos profesionales y modernos */}
         {config.specialAcknowledgements && config.specialAcknowledgements.length > 0 && (
-          <div className="space-y-16 md:space-y-20 lg:space-y-24 mb-16 md:mb-20 max-w-7xl mx-auto">
-            {config.specialAcknowledgements.map((acknowledgement, index) => {
-              // Soporta tanto el nuevo formato (images) como el antiguo (imageSrc) para retrocompatibilidad
-              const images = acknowledgement.images 
-                ? (Array.isArray(acknowledgement.images) 
-                    ? acknowledgement.images 
-                    : [{ src: acknowledgement.images, alt: acknowledgement.imageAlt || 'Foto especial' }])
-                : acknowledgement.imageSrc 
-                  ? [{ src: acknowledgement.imageSrc, alt: acknowledgement.imageAlt || 'Foto especial' }]
-                  : []
-
-              return (
-                <AnimatedGoldenFrame
-                  key={index}
-                  images={images}
-                  imageAlt={acknowledgement.imageAlt}
-                  text={acknowledgement.text}
-                  variant={(index % 3 + 1) as 1 | 2 | 3}
-                  delay={index * 0.2}
-                />
-              )
-            })}
+          <div className="space-y-12 md:space-y-16 lg:space-y-20 mb-16 md:mb-20">
+            {config.specialAcknowledgements.map((acknowledgement, index) => (
+              <AnimatedGoldenFrame
+                key={index}
+                text={acknowledgement.text}
+                variant={(index % 3 + 1) as 1 | 2 | 3}
+                delay={index * 0.2}
+              />
+            ))}
           </div>
         )}
       </div>

@@ -8,11 +8,22 @@ import Section from './Section'
 import Modal from './Modal'
 import GeometricBackground from './GeometricBackground'
 
-interface RsvpFormData {
+interface Invitado {
+  id: number
   nombre: string
-  acompanantes: string
-  telefono: string
+  apellido: string
+  acompanantes: number | null
+  whatsapp: string
+  asistencia: string
+  lider: number
   comentarios: string
+}
+
+interface GrupoInvitados {
+  lider: Invitado
+  grupo: Invitado[]
+  totalPersonas: number
+  yaConfirmado?: boolean
 }
 
 interface FloatingHeart {
@@ -31,13 +42,15 @@ export default function RsvpSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [floatingHearts, setFloatingHearts] = useState<FloatingHeart[]>([])
-  const [formData, setFormData] = useState<RsvpFormData>({
-    nombre: '',
-    acompanantes: '0',
-    telefono: '',
-    comentarios: '',
-  })
-  const [errors, setErrors] = useState<Partial<RsvpFormData>>({})
+  
+  // Estado del flujo multi-paso
+  const [paso, setPaso] = useState<'telefono' | 'confirmacion' | 'yaConfirmado' | 'exito'>('telefono')
+  const [telefono, setTelefono] = useState('')
+  const [grupoInvitados, setGrupoInvitados] = useState<GrupoInvitados | null>(null)
+  const [asistencia, setAsistencia] = useState<'Si' | 'No' | ''>('')
+  const [comentarios, setComentarios] = useState('')
+  const [numAcompanantes, setNumAcompanantes] = useState<number>(0) // Para invitados con acompanantes flexibles
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const hearts: FloatingHeart[] = Array.from({ length: 10 }, (_, i) => ({
@@ -52,29 +65,54 @@ export default function RsvpSection() {
     setFloatingHearts(hearts)
   }, [])
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<RsvpFormData> = {}
-    
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre es obligatorio'
-    }
-    
-    if (!formData.telefono.trim()) {
-      newErrors.telefono = 'El teléfono es obligatorio'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
+  // Buscar invitado por teléfono
+  const handleBuscarInvitado = async (e: FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) {
+    if (!telefono.trim()) {
+      setError('Por favor, ingresa tu número de teléfono')
       return
     }
 
     setIsSubmitting(true)
+    setError('')
+
+    try {
+      const response = await fetch(`/api/rsvp?telefono=${encodeURIComponent(telefono)}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setGrupoInvitados(data)
+        // Si ya confirmaron, ir directo a mostrar el estado
+        if (data.yaConfirmado) {
+          setPaso('yaConfirmado')
+        } else {
+          setPaso('confirmacion')
+        }
+      } else {
+        setError(data.message || 'No encontramos tu número en nuestra lista de invitados')
+      }
+    } catch (error) {
+      console.error('Error al buscar invitado:', error)
+      setError('Hubo un error al buscar tu invitación. Por favor, intenta nuevamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Confirmar asistencia
+  const handleConfirmarAsistencia = async (e: FormEvent) => {
+    e.preventDefault()
+    
+    if (!asistencia) {
+      setError('Por favor, selecciona si asistirás o no')
+      return
+    }
+
+    if (!grupoInvitados) return
+
+    setIsSubmitting(true)
+    setError('')
 
     try {
       const response = await fetch('/api/rsvp', {
@@ -82,38 +120,41 @@ export default function RsvpSection() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          liderId: grupoInvitados.lider.id,
+          asistencia,
+          comentarios,
+          numAcompanantes: grupoInvitados.lider.acompanantes === null ? numAcompanantes : undefined,
+        }),
       })
 
       if (response.ok) {
-        setSubmitSuccess(true)
-        // Resetear formulario después de 3 segundos
+        setPaso('exito')
+        // Cerrar modal después de 5 segundos
         setTimeout(() => {
-          setFormData({
-            nombre: '',
-            acompanantes: '0',
-            telefono: '',
-            comentarios: '',
-          })
-          setSubmitSuccess(false)
-          setIsModalOpen(false)
-        }, 3000)
+          handleCloseModal()
+        }, 5000)
       } else {
-        alert('Hubo un error al enviar la confirmación. Por favor, intenta nuevamente.')
+        const data = await response.json()
+        setError(data.error || 'Hubo un error al confirmar tu asistencia')
       }
     } catch (error) {
-      console.error('Error al enviar RSVP:', error)
-      alert('Hubo un error al enviar la confirmación. Por favor, intenta nuevamente.')
+      console.error('Error al confirmar asistencia:', error)
+      setError('Hubo un error al confirmar tu asistencia. Por favor, intenta nuevamente.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleChange = (field: keyof RsvpFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setPaso('telefono')
+    setTelefono('')
+    setGrupoInvitados(null)
+    setAsistencia('')
+    setComentarios('')
+    setNumAcompanantes(0)
+    setError('')
   }
 
   // Calcular fecha límite
@@ -398,20 +439,12 @@ export default function RsvpSection() {
         isOpen={isModalOpen}
         onClose={() => {
           if (!isSubmitting) {
-            setIsModalOpen(false)
-            setSubmitSuccess(false)
-            setFormData({
-              nombre: '',
-              acompanantes: '0',
-              telefono: '',
-              comentarios: '',
-            })
-            setErrors({})
+            handleCloseModal()
           }
         }}
-        title="Confirmación de Asistencia"
+        title={paso === 'telefono' ? 'Confirma tu Asistencia' : 'Confirmación de Asistencia'}
       >
-        {submitSuccess ? (
+        {paso === 'exito' ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -472,61 +505,135 @@ export default function RsvpSection() {
               </div>
             </div>
           </motion.div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nombre completo */}
-            <div>
-              <label htmlFor="nombre" className="block text-text-primary font-sans font-medium mb-2 flex items-center gap-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                Nombre completo <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="nombre"
-                type="text"
-                value={formData.nombre}
-                onChange={(e) => handleChange('nombre', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans"
-                placeholder="Tu nombre completo"
-                disabled={isSubmitting}
-              />
-              {errors.nombre && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
+        ) : paso === 'yaConfirmado' ? (
+          // MENSAJE: Ya hay asistencia confirmada
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-6"
+          >
+            {grupoInvitados && (
+              <>
+                {/* Mensaje informativo */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-red-500 text-sm mt-1 flex items-center gap-1"
+                  className="bg-gradient-to-br from-[#FFE5B4]/50 to-[#FFD7D7]/30 rounded-2xl p-6 border-2 border-[#D4AF37]/20"
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
-                  </svg>
-                  {errors.nombre}
-                </motion.p>
-              )}
-            </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#FFD700] flex items-center justify-center flex-shrink-0">
+                      {grupoInvitados.grupo[0].asistencia === 'Si' ? (
+                        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-serif text-text-primary">
+                        ¡Hola, {grupoInvitados.lider.nombre}!
+                      </h3>
+                      <p className="text-sm text-text-secondary mt-1">
+                        Ya has confirmado tu asistencia
+                      </p>
+                    </div>
+                  </div>
 
-            {/* Número de acompañantes */}
-            <div>
-              <label htmlFor="acompanantes" className="block text-text-primary font-sans font-medium mb-2 flex items-center gap-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
-                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                  <div className="bg-white/60 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-sans text-text-secondary">Estado actual:</span>
+                      <span className={`font-serif text-lg font-bold ${
+                        grupoInvitados.grupo[0].asistencia === 'Si' 
+                          ? 'text-green-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {grupoInvitados.grupo[0].asistencia === 'Si' ? '✓ Confirmado - Asistiré' : '✗ No asistiré'}
+                      </span>
+                    </div>
+
+                    {grupoInvitados.grupo[0].comentarios && (
+                      <div className="pt-2 border-t border-gray-200">
+                        <p className="text-sm text-text-secondary mb-1">Comentarios:</p>
+                        <p className="text-text-primary italic">"{grupoInvitados.grupo[0].comentarios}"</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <p className="text-text-primary font-sans text-sm">
+                      {grupoInvitados.grupo[0].asistencia === 'Si' 
+                        ? '¡Nos vemos en el evento! Estamos muy emocionados de contar contigo.' 
+                        : 'Lamentamos que no puedas asistir. ¡Esperamos verte en otra ocasión!'}
+                    </p>
+                    <p className="text-text-secondary font-sans text-xs">
+                      Si necesitas hacer algún cambio, por favor contacta directamente a los organizadores.
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Lista del grupo */}
+                <div className="space-y-3">
+                  <h4 className="font-sans font-medium text-text-primary flex items-center gap-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
+                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    Tu grupo ({grupoInvitados.totalPersonas} persona{grupoInvitados.totalPersonas !== 1 ? 's' : ''})
+                  </h4>
+                  <div className="bg-white/50 rounded-xl p-4 space-y-2 max-h-48 overflow-y-auto">
+                    {grupoInvitados.grupo.map((inv) => (
+                      <div key={inv.id} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FFB6C1] to-[#FFD7D7] flex items-center justify-center">
+                            <span className="text-xs font-bold text-white">
+                              {inv.nombre.charAt(0)}
+                            </span>
+                          </div>
+                          <span className="font-sans text-text-primary">
+                            {inv.nombre} {inv.apellido}
+                          </span>
+                        </div>
+                        {inv.id === grupoInvitados.lider.id && inv.acompanantes !== null && inv.acompanantes > 0 && (
+                          <span className="text-xs bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-1 rounded-full font-sans">
+                            +{inv.acompanantes} acompañante{inv.acompanantes !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Botón para cerrar */}
+                <div className="pt-4">
+                  <motion.button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="w-full bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white font-serif text-lg px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Cerrar
+                  </motion.button>
+                </div>
+              </>
+            )}
+          </motion.div>
+        ) : paso === 'telefono' ? (
+          // PASO 1: Solicitar número de teléfono
+          <form onSubmit={handleBuscarInvitado} className="space-y-6">
+            <div className="text-center space-y-4 mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#FFD700] shadow-lg">
+                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
-                Número de acompañantes
-              </label>
-              <input
-                id="acompanantes"
-                type="number"
-                min="0"
-                max="10"
-                value={formData.acompanantes}
-                onChange={(e) => handleChange('acompanantes', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans"
-                placeholder="0"
-                disabled={isSubmitting}
-              />
+              </div>
+              <p className="text-text-secondary font-sans text-base">
+                Ingresa tu número de teléfono para verificar tu invitación
+              </p>
             </div>
 
-            {/* Teléfono / WhatsApp */}
             <div>
               <label htmlFor="telefono" className="block text-text-primary font-sans font-medium mb-2 flex items-center gap-2">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
@@ -537,45 +644,30 @@ export default function RsvpSection() {
               <input
                 id="telefono"
                 type="tel"
-                value={formData.telefono}
-                onChange={(e) => handleChange('telefono', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans"
+                value={telefono}
+                onChange={(e) => {
+                  setTelefono(e.target.value)
+                  setError('')
+                }}
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans text-lg"
                 placeholder="+52 123 456 7890"
                 disabled={isSubmitting}
+                autoFocus
               />
-              {errors.telefono && (
+              {error && (
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-red-500 text-sm mt-1 flex items-center gap-1"
+                  className="text-red-500 text-sm mt-2 flex items-center gap-1"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
                   </svg>
-                  {errors.telefono}
+                  {error}
                 </motion.p>
               )}
             </div>
 
-            {/* Comentarios / Restricciones alimentarias */}
-            <div>
-              <label htmlFor="comentarios" className="block text-text-primary font-sans font-medium mb-2 flex items-center gap-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
-                  <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-                </svg>
-                Comentarios / Restricciones alimentarias
-              </label>
-              <textarea
-                id="comentarios"
-                value={formData.comentarios}
-                onChange={(e) => handleChange('comentarios', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans min-h-[100px] resize-y"
-                placeholder="Cualquier comentario o restricción alimentaria que debamos conocer..."
-                disabled={isSubmitting}
-              />
-            </div>
-
-            {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <motion.button
                 type="submit"
@@ -587,31 +679,259 @@ export default function RsvpSection() {
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <motion.div
-                      className="w-5 h-5"
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="white" className="w-full h-full">
-                        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                      </svg>
-                    </motion.div>
-                    Enviando...
+                    />
+                    Buscando...
                   </span>
                 ) : (
-                  'Enviar confirmación'
+                  'Continuar'
                 )}
               </motion.button>
               <motion.button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCloseModal}
                 disabled={isSubmitting}
                 className="flex-1 bg-white text-text-primary font-serif text-lg px-6 py-3 rounded-xl border-2 border-gray-200 hover:border-[#D4AF37] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                 whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
               >
-                Cerrar
+                Cancelar
               </motion.button>
             </div>
+          </form>
+        ) : (
+          // PASO 2: Mostrar grupo y confirmar asistencia
+          <form onSubmit={handleConfirmarAsistencia} className="space-y-6">
+            {grupoInvitados && (
+              <>
+                {/* Mensaje de bienvenida personalizado */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-gradient-to-br from-[#FFE5B4]/50 to-[#FFD7D7]/30 rounded-2xl p-6 border-2 border-[#D4AF37]/20"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#FFD700] flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-serif text-text-primary">
+                        ¡Hola, {grupoInvitados.lider.nombre}!
+                      </h3>
+                      <p className="text-sm text-text-secondary">
+                        Nos alegra mucho que estés aquí
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-text-secondary font-sans text-sm">
+                    Encontramos tu invitación. Puedes confirmar la asistencia para tu grupo.
+                  </p>
+                </motion.div>
+
+                {/* Lista del grupo */}
+                <div className="space-y-3">
+                  <h4 className="font-sans font-medium text-text-primary flex items-center gap-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
+                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    Invitados confirmados ({grupoInvitados.totalPersonas + (grupoInvitados.lider.acompanantes === null ? numAcompanantes : 0)} persona{(grupoInvitados.totalPersonas + (grupoInvitados.lider.acompanantes === null ? numAcompanantes : 0)) !== 1 ? 's' : ''})
+                  </h4>
+                  <div className="bg-white/50 rounded-xl p-4 space-y-2 max-h-48 overflow-y-auto">
+                    {grupoInvitados.grupo.map((inv) => (
+                      <div key={inv.id} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FFB6C1] to-[#FFD7D7] flex items-center justify-center">
+                            <span className="text-xs font-bold text-white">
+                              {inv.nombre.charAt(0)}
+                            </span>
+                          </div>
+                          <span className="font-sans text-text-primary">
+                            {inv.nombre} {inv.apellido}
+                          </span>
+                        </div>
+                        {inv.id === grupoInvitados.lider.id && inv.acompanantes !== null && inv.acompanantes > 0 && (
+                          <span className="text-xs bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-1 rounded-full font-sans">
+                            +{inv.acompanantes} acompañante{inv.acompanantes !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {inv.id === grupoInvitados.lider.id && inv.acompanantes === null && numAcompanantes > 0 && (
+                          <span className="text-xs bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-1 rounded-full font-sans">
+                            +{numAcompanantes} acompañante{numAcompanantes !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Selector de número de acompañantes (solo si es flexible) */}
+                {grupoInvitados.lider.acompanantes === null && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-3"
+                  >
+                    <label htmlFor="numAcompanantes" className="block text-text-primary font-sans font-medium flex items-center gap-2">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                      </svg>
+                      ¿Cuántos acompañantes llevarás?
+                    </label>
+                    <div className="bg-gradient-to-br from-[#FFE5B4]/30 to-[#FFD7D7]/20 rounded-xl p-4 border-2 border-[#D4AF37]/20">
+                      <select
+                        id="numAcompanantes"
+                        value={numAcompanantes}
+                        onChange={(e) => setNumAcompanantes(Number(e.target.value))}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans text-lg bg-white"
+                        disabled={isSubmitting}
+                      >
+                        <option value={0}>Sin acompañantes</option>
+                        <option value={1}>1 acompañante</option>
+                        <option value={2}>2 acompañantes</option>
+                        <option value={3}>3 acompañantes</option>
+                        <option value={4}>4 acompañantes</option>
+                        <option value={5}>5 acompañantes</option>
+                        <option value={6}>6 acompañantes</option>
+                        <option value={7}>7 acompañantes</option>
+                        <option value={8}>8 acompañantes</option>
+                        <option value={9}>9 acompañantes</option>
+                        <option value={10}>10 acompañantes</option>
+                      </select>
+                      <p className="text-xs text-text-secondary mt-2 flex items-center gap-1">
+                        <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        Selecciona el número total de personas que te acompañarán
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Selección de asistencia */}
+                <div>
+                  <label className="block text-text-primary font-sans font-medium mb-3">
+                    ¿Podrás asistir? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <motion.button
+                      type="button"
+                      onClick={() => {
+                        setAsistencia('Si')
+                        setError('')
+                      }}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        asistencia === 'Si'
+                          ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                          : 'border-gray-200 hover:border-[#D4AF37]/50'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <svg className="w-8 h-8" viewBox="0 0 24 24" fill={asistencia === 'Si' ? '#D4AF37' : '#999'}>
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                        </svg>
+                        <span className={`font-serif text-lg ${asistencia === 'Si' ? 'text-[#D4AF37]' : 'text-text-secondary'}`}>
+                          Sí, asistiré
+                        </span>
+                      </div>
+                    </motion.button>
+                    <motion.button
+                      type="button"
+                      onClick={() => {
+                        setAsistencia('No')
+                        setError('')
+                      }}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        asistencia === 'No'
+                          ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                          : 'border-gray-200 hover:border-[#D4AF37]/50'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <svg className="w-8 h-8" viewBox="0 0 24 24" fill={asistencia === 'No' ? '#D4AF37' : '#999'}>
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                        </svg>
+                        <span className={`font-serif text-lg ${asistencia === 'No' ? 'text-[#D4AF37]' : 'text-text-secondary'}`}>
+                          No podré asistir
+                        </span>
+                      </div>
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* Comentarios */}
+                <div>
+                  <label htmlFor="comentarios" className="block text-text-primary font-sans font-medium mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#D4AF37">
+                      <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+                    </svg>
+                    Comentarios / Restricciones alimentarias
+                  </label>
+                  <textarea
+                    id="comentarios"
+                    value={comentarios}
+                    onChange={(e) => setComentarios(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all outline-none font-sans min-h-[100px] resize-y"
+                    placeholder="Cualquier comentario o restricción alimentaria que debamos conocer..."
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-500 text-sm flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+                    </svg>
+                    {error}
+                  </motion.p>
+                )}
+
+                {/* Botones */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <motion.button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white font-serif text-lg px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        />
+                        Confirmando...
+                      </span>
+                    ) : (
+                      'Enviar confirmación'
+                    )}
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={() => setPaso('telefono')}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-white text-text-primary font-serif text-lg px-6 py-3 rounded-xl border-2 border-gray-200 hover:border-[#D4AF37] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                  >
+                    Atrás
+                  </motion.button>
+                </div>
+              </>
+            )}
           </form>
         )}
       </Modal>
