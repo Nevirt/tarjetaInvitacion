@@ -402,12 +402,42 @@ export function actualizarAsistenciaGrupo(
 }
 
 /**
+ * Función helper para normalizar números de teléfono de Paraguay
+ * Acepta formatos:
+ * - Internacional: +595976570130
+ * - Local: 0976570130
+ * - Sin prefijo: 976570130
+ */
+function normalizarTelefonoParaguay(telefono: string): string {
+  // Quitar espacios, guiones, paréntesis y el símbolo +
+  let normalizado = telefono.replace(/[\s\-()+ ]/g, '')
+  
+  // Si empieza con 595 (código de Paraguay), quitarlo
+  if (normalizado.startsWith('595')) {
+    normalizado = normalizado.substring(3)
+  }
+  
+  // Si empieza con 0 (formato local paraguayo 09...), quitarlo
+  if (normalizado.startsWith('0')) {
+    normalizado = normalizado.substring(1)
+  }
+  
+  return normalizado
+}
+
+/**
  * Función helper para buscar invitados por teléfono
+ * Acepta tanto formato internacional (+595) como local paraguayo (09)
  */
 export function buscarPorTelefono(telefono: string): Invitado | undefined {
-  const telefonoNormalizado = telefono.replace(/[\s\-()]/g, '')
+  const telefonoNormalizado = normalizarTelefonoParaguay(telefono)
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[BUSCAR] Teléfono ingresado:', telefono, '-> Normalizado:', telefonoNormalizado)
+  }
+  
   return globalThis._invitadosEnMemoria!.find((inv) => {
-    const whatsappNormalizado = inv.whatsapp.replace(/[\s\-()]/g, '')
+    const whatsappNormalizado = normalizarTelefonoParaguay(inv.whatsapp)
     return whatsappNormalizado === telefonoNormalizado
   })
 }
