@@ -178,7 +178,7 @@ export default function AnimatedGoldenFrame({
               whileInView={{ opacity: 0.15, x: 0 }}
               transition={{ delay: delay + 0.4, duration: 0.6 }}
             >
-              "
+              &ldquo;
             </motion.div>
 
             {/* Texto del mensaje */}
@@ -194,7 +194,7 @@ export default function AnimatedGoldenFrame({
               whileInView={{ opacity: 0.15, x: 0 }}
               transition={{ delay: delay + 0.4, duration: 0.6 }}
             >
-              "
+              &rdquo;
             </motion.div>
           </motion.div>
 

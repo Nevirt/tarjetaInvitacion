@@ -557,7 +557,7 @@ export default function RsvpSection() {
                     {grupoInvitados.grupo[0].comentarios && (
                       <div className="pt-2 border-t border-gray-200">
                         <p className="text-sm text-text-secondary mb-1">Comentarios:</p>
-                        <p className="text-text-primary italic">"{grupoInvitados.grupo[0].comentarios}"</p>
+                        <p className="text-text-primary italic">&ldquo;{grupoInvitados.grupo[0].comentarios}&rdquo;</p>
                       </div>
                     )}
                   </div>
