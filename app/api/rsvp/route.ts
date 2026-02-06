@@ -1,34 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  obtenerListaInvitados,
-  actualizarAsistenciaGrupo, 
-  buscarPorTelefono, 
-  obtenerGrupoPorLider,
-  type Invitado 
-} from '@/app/data/invitados'
 
 /**
  * API Route para manejar las confirmaciones de asistencia (RSVP)
  * 
- * Sistema basado en datos en memoria con validación por número de teléfono:
- * - GET: Busca invitados por número de teléfono
- * - POST: Actualiza la asistencia en memoria
+ * Sistema basado en backend API:
+ * - GET: Busca invitados por número de teléfono usando el backend
+ * - POST: Actualiza la asistencia usando el backend
  */
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5137/api';
+
+interface InvitadoRsvp {
+  id: number
+  nombre: string
+  apellido: string
+  asistencia?: string
+}
+
 interface GrupoInvitados {
-  lider: Invitado
-  grupo: Invitado[]
+  lider: InvitadoRsvp & { acompanantes?: number | null }
+  grupo: InvitadoRsvp[]
   totalPersonas: number
   yaConfirmado?: boolean
 }
 
 /**
- * GET - Buscar invitados por número de teléfono
+ * GET - Buscar invitados por número de teléfono usando el backend
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const telefono = searchParams.get('telefono')
+    const slug = searchParams.get('slug')
 
     if (!telefono) {
       return NextResponse.json(
@@ -37,10 +40,47 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar el invitado por teléfono
-    const invitadoEncontrado = buscarPorTelefono(telefono)
+    if (!slug) {
+      return NextResponse.json(
+        { error: 'Slug del evento es obligatorio' },
+        { status: 400 }
+      )
+    }
 
-    if (!invitadoEncontrado) {
+    // Llamar al backend para buscar el invitado
+    const backendResponse = await fetch(
+      `${API_URL}/rsvp/${encodeURIComponent(slug)}/buscar?telefono=${encodeURIComponent(telefono)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!backendResponse.ok) {
+      if (backendResponse.status === 404) {
+        return NextResponse.json(
+          { 
+            error: 'Número no encontrado',
+            message: 'No encontramos tu número en nuestra lista de invitados. Por favor, verifica el número o contacta a los organizadores.'
+          },
+          { status: 404 }
+        )
+      }
+      const errorData = await backendResponse.json().catch(() => ({}))
+      return NextResponse.json(
+        { 
+          error: errorData.error || 'Error al buscar invitado',
+          message: errorData.message || 'No encontramos tu número en nuestra lista de invitados. Por favor, verifica el número o contacta a los organizadores.'
+        },
+        { status: backendResponse.status }
+      )
+    }
+
+    const backendData = await backendResponse.json()
+
+    if (!backendData.encontrado) {
       return NextResponse.json(
         { 
           error: 'Número no encontrado',
@@ -50,52 +90,49 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Obtener el ID del líder
-    const liderId = invitadoEncontrado.lider
-
-    // Buscar todos los invitados del mismo grupo (mismo líder)
-    const grupoCompleto = obtenerGrupoPorLider(liderId)
-    
-    // Encontrar al líder
-    const lider = grupoCompleto.find(inv => inv.id === liderId)!
-
-    // Calcular total de personas:
-    // - Registros individuales del grupo (ej: Juan, María, Carlos = 3)
-    // - Más acompañantes sin nombre del líder (ej: niños pequeños)
-    // Si acompanantes es null, no se suma nada aún (se definirá al confirmar)
-    const totalPersonas = grupoCompleto.length + (lider.acompanantes ?? 0)
-
-    // Verificar si ya hay asistencia confirmada
-    const yaConfirmado = grupoCompleto[0].asistencia !== ''
-    
+    // Transformar la respuesta del backend al formato esperado por el frontend
     const respuesta: GrupoInvitados = {
-      lider,
-      grupo: grupoCompleto,
-      totalPersonas,
-      yaConfirmado
+      lider: {
+        id: backendData.lider.id,
+        nombre: backendData.lider.nombre,
+        apellido: backendData.lider.apellido,
+        asistencia: backendData.lider.asistencia === 1 ? 'Si' : backendData.lider.asistencia === 2 ? 'No' : '',
+        acompanantes: null, // Esto se manejará en el backend
+      },
+      grupo: backendData.grupo.map((inv: any) => ({
+        id: inv.id,
+        nombre: inv.nombre,
+        apellido: inv.apellido,
+        asistencia: inv.asistencia === 1 ? 'Si' : inv.asistencia === 2 ? 'No' : '',
+      })),
+      totalPersonas: backendData.totalPersonas,
+      yaConfirmado: backendData.yaConfirmo,
     }
 
     return NextResponse.json(respuesta, { status: 200 })
   } catch (error) {
     console.error('Error al buscar invitado:', error)
     return NextResponse.json(
-      { error: 'Error al buscar en la lista de invitados' },
+      { 
+        error: 'Error al buscar en la lista de invitados',
+        message: 'Hubo un error al buscar tu invitación. Por favor, intenta nuevamente.'
+      },
       { status: 500 }
     )
   }
 }
 
 /**
- * POST - Actualizar asistencia en memoria
+ * POST - Actualizar asistencia usando el backend
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { liderId, asistencia, comentarios, numAcompanantes } = body
+    const { slug, invitadoId, asistencia, comentarios } = body
 
-    if (!liderId || !asistencia) {
+    if (!slug || !invitadoId || !asistencia) {
       return NextResponse.json(
-        { error: 'ID del líder y asistencia son obligatorios' },
+        { error: 'Slug, ID del invitado y asistencia son obligatorios' },
         { status: 400 }
       )
     }
@@ -107,53 +144,53 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Log de debug antes de actualizar
-    if (process.env.NODE_ENV === 'development') {
-      const grupoAntes = obtenerGrupoPorLider(liderId)
-      console.log('[RSVP POST] Antes de actualizar:', {
-        liderId,
-        asistencia,
-        numAcompanantes,
-        grupoAntes: grupoAntes.map(inv => ({ 
-          id: inv.id, 
-          nombre: inv.nombre, 
-          asistencia: inv.asistencia,
-          acompanantes: inv.acompanantes 
-        }))
-      })
+    // Convertir asistencia a formato del backend (1 = Si, 2 = No)
+    const asistenciaBackend = asistencia === 'Si' ? 1 : 2
+
+    // Llamar al backend para confirmar asistencia
+    const backendResponse = await fetch(
+      `${API_URL}/rsvp/${encodeURIComponent(slug)}/confirmar`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invitadoId,
+          asistencia: asistenciaBackend,
+          comentarios: comentarios || null,
+        }),
+      }
+    )
+
+    if (!backendResponse.ok) {
+      const errorData = await backendResponse.json().catch(() => ({}))
+      return NextResponse.json(
+        { 
+          error: errorData.error || 'Error al confirmar asistencia',
+          message: errorData.message || 'Hubo un error al confirmar tu asistencia. Por favor, intenta nuevamente.'
+        },
+        { status: backendResponse.status }
+      )
     }
 
-    // Actualizar todos los invitados del grupo en memoria
-    // Si numAcompanantes está definido, significa que el líder tiene acompañantes flexibles
-    actualizarAsistenciaGrupo(liderId, asistencia, comentarios || '', numAcompanantes)
-
-    // Obtener el grupo actualizado
-    const grupoActualizado = obtenerGrupoPorLider(liderId)
-
-    // Log de debug después de actualizar
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[RSVP POST] Después de actualizar:', {
-        liderId,
-        grupoActualizado: grupoActualizado.map(inv => ({ 
-          id: inv.id, 
-          nombre: inv.nombre, 
-          asistencia: inv.asistencia,
-          acompanantes: inv.acompanantes 
-        }))
-      })
-    }
+    const backendData = await backendResponse.json()
 
     return NextResponse.json(
       { 
-        message: 'Asistencia confirmada exitosamente',
-        grupo: grupoActualizado
+        message: backendData.mensaje || 'Asistencia confirmada exitosamente',
+        totalPersonas: backendData.totalPersonas,
+        asistencia: backendData.asistencia === 1 ? 'Si' : 'No',
       },
       { status: 200 }
     )
   } catch (error) {
     console.error('Error al actualizar asistencia:', error)
     return NextResponse.json(
-      { error: 'Error al actualizar la asistencia' },
+      { 
+        error: 'Error al actualizar la asistencia',
+        message: 'Hubo un error al confirmar tu asistencia. Por favor, intenta nuevamente.'
+      },
       { status: 500 }
     )
   }

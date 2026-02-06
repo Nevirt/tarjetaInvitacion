@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import { useState, useEffect } from 'react'
 import GeometricBackground from './GeometricBackground'
 
@@ -16,7 +16,7 @@ interface FloatingElement {
 }
 
 export default function Footer() {
-  const { config } = useInvitacionConfig()
+  const config = invitacionConfig
   const [floatingElements, setFloatingElements] = useState<FloatingElement[]>([])
   const currentYear = new Date().getFullYear()
 
@@ -137,7 +137,7 @@ export default function Footer() {
                     {config.honoreeName}
                   </h3>
                   <p className="text-text-primary font-serif text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                    {config.footerText || 'Gracias por acompañarme en este día tan especial'}
+                    Gracias por acompañarme en este día tan especial
                   </p>
                   
                   {/* Decorative divider */}

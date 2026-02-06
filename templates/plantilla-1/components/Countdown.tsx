@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import GeometricBackground from './GeometricBackground'
 
 export default function Countdown() {
-  const { config } = useInvitacionConfig()
+  const config = invitacionConfig
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,

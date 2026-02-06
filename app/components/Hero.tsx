@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { invitacionConfig } from '../config/invitacion'
+import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
 import MusicPlayer from './MusicPlayer'
 import Image from 'next/image'
 import { memo } from 'react'
@@ -9,7 +9,7 @@ import FloatingBubbles from './FloatingBubbles'
 import GeometricBackground from './GeometricBackground'
 
 function Hero() {
-  const config = invitacionConfig
+  const { config } = useInvitacionConfig()
 
   // Formatear fecha y hora
   const eventDate = new Date(config.eventDateTime)
@@ -23,8 +23,32 @@ function Hero() {
   const hours = eventDate.getHours().toString().padStart(2, '0')
   const minutes = eventDate.getMinutes().toString().padStart(2, '0')
 
+  // Usar colores dinámicos si están disponibles
+  const bgColor = config.backgroundColor || '#FAF7F2'
+  const bgColor2 = config.backgroundColor || '#FFF9F0'
+  
+  // Función helper para estilos de texto dorado dinámico
+  const getGoldenTextStyle = () => {
+    if (config.primaryColor) {
+      return {
+        background: `linear-gradient(90deg, ${config.primaryColor} 0%, ${config.accentColor || config.primaryColor} 50%, ${config.primaryColor} 100%)`,
+        backgroundSize: '200% auto',
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        animation: 'shimmer 3s infinite',
+      } as React.CSSProperties
+    }
+    return {}
+  }
+  
   return (
-    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#FFF9F0] to-[#FAF7F2]">
+    <div 
+      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden"
+      style={{ 
+        background: `linear-gradient(to bottom, ${bgColor}, ${bgColor2}, ${bgColor})`
+      }}
+    >
 
       {/* Efecto de burbujas/humo etéreo de fondo */}
       <FloatingBubbles />
@@ -228,9 +252,9 @@ function Hero() {
           <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="goldenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 0.8 }} />
-                <stop offset="50%" style={{ stopColor: '#D4AF37', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#FFD700', stopOpacity: 0.8 }} />
+                <stop offset="0%" style={{ stopColor: config.primaryColor || '#FFD700', stopOpacity: 0.8 }} />
+                <stop offset="50%" style={{ stopColor: config.accentColor || config.primaryColor || '#D4AF37', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: config.primaryColor || '#FFD700', stopOpacity: 0.8 }} />
               </linearGradient>
               <filter id="glow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -437,21 +461,24 @@ function Hero() {
         />
 
         {/* Título del evento - Serif elegante */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          className="text-xl sm:text-2xl md:text-3xl font-serif text-text-primary mb-6 sm:mb-8 tracking-wide"
-        >
-          {config.eventTitle}
-        </motion.div>
+        {(config.eventTitle || config.honoreeName) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="text-xl sm:text-2xl md:text-3xl font-serif text-text-primary mb-6 sm:mb-8 tracking-wide"
+          >
+            {config.eventTitle || config.honoreeName}
+          </motion.div>
+        )}
 
         {/* Nombre de la homenajeada - Script elegante y grande con brillo dorado */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-script mb-8 sm:mb-10 md:mb-12 leading-tight golden-shine golden-glow relative px-2"
+          className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-script mb-8 sm:mb-10 md:mb-12 leading-tight relative px-2 ${!config.primaryColor ? 'golden-shine golden-glow' : ''}`}
+          style={getGoldenTextStyle()}
         >
           {config.honoreeName}
         </motion.h1>
@@ -463,7 +490,7 @@ function Hero() {
           transition={{ delay: 1.0, duration: 0.6 }}
           className="text-base sm:text-lg md:text-xl font-serif text-text-secondary mb-8 sm:mb-10 md:mb-12 tracking-wide px-2"
         >
-          Acompáñanos a celebrar este día especial
+          {config.heroSubtitle || 'Acompáñanos a celebrar este día especial'}
         </motion.div>
 
         {/* Fecha - Diseño estructurado como en la referencia */}
@@ -474,23 +501,42 @@ function Hero() {
           className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-6 mb-6 sm:mb-8 px-2"
         >
           {/* Día - Número grande con brillo dorado */}
-          <div className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
+          <div 
+            className={`text-4xl sm:text-5xl md:text-7xl font-serif font-bold ${!config.primaryColor ? 'golden-shine golden-glow' : ''}`}
+            style={getGoldenTextStyle()}
+          >
             {day}
           </div>
 
           {/* Separador vertical con brillo */}
-          <div className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
+          <div 
+            className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent to-transparent"
+            style={{
+              background: `linear-gradient(to bottom, transparent, ${config.primaryColor || '#FCD34D'}40, transparent)`
+            }}
+          ></div>
 
           {/* Mes - Script elegante con brillo dorado */}
-          <div className="text-3xl sm:text-4xl md:text-6xl font-script golden-shine golden-glow">
+          <div 
+            className={`text-3xl sm:text-4xl md:text-6xl font-script ${!config.primaryColor ? 'golden-shine golden-glow' : ''}`}
+            style={getGoldenTextStyle()}
+          >
             {month}
           </div>
 
           {/* Separador vertical con brillo */}
-          <div className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent via-amber-300/40 to-transparent"></div>
+          <div 
+            className="h-12 sm:h-16 md:h-20 w-px bg-gradient-to-b from-transparent to-transparent"
+            style={{
+              background: `linear-gradient(to bottom, transparent, ${config.primaryColor || '#FCD34D'}40, transparent)`
+            }}
+          ></div>
 
           {/* Año - Número grande con brillo dorado */}
-          <div className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold golden-shine golden-glow">
+          <div 
+            className={`text-4xl sm:text-5xl md:text-7xl font-serif font-bold ${!config.primaryColor ? 'golden-shine golden-glow' : ''}`}
+            style={getGoldenTextStyle()}
+          >
             {year}
           </div>
         </motion.div>
@@ -502,7 +548,10 @@ function Hero() {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="space-y-2 px-2"
         >
-          <div className="text-2xl sm:text-3xl md:text-5xl font-serif font-semibold mb-2 golden-shine golden-glow">
+          <div 
+            className={`text-2xl sm:text-3xl md:text-5xl font-serif font-semibold mb-2 ${!config.primaryColor ? 'golden-shine golden-glow' : ''}`}
+            style={getGoldenTextStyle()}
+          >
             {hours}:{minutes} HS.
           </div>
           <div className="text-sm sm:text-base md:text-lg font-sans text-text-secondary">

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, FormEvent, useEffect } from 'react'
-import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import Section from './Section'
 import Modal from './Modal'
 import GeometricBackground from './GeometricBackground'
@@ -37,10 +36,8 @@ interface FloatingHeart {
   emoji: string
 }
 
-export default function RsvpSection({ eventoId }: { eventoId: number }) {
-  const { config } = useInvitacionConfig()
-  const params = useParams()
-  const slug = params?.slug as string
+export default function RsvpSection() {
+  const config = invitacionConfig
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -81,7 +78,7 @@ export default function RsvpSection({ eventoId }: { eventoId: number }) {
     setError('')
 
     try {
-      const response = await fetch(`/api/rsvp?telefono=${encodeURIComponent(telefono)}&slug=${encodeURIComponent(slug)}`)
+      const response = await fetch(`/api/rsvp?telefono=${encodeURIComponent(telefono)}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -124,10 +121,10 @@ export default function RsvpSection({ eventoId }: { eventoId: number }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          slug,
-          invitadoId: grupoInvitados.lider.id,
+          liderId: grupoInvitados.lider.id,
           asistencia,
           comentarios,
+          numAcompanantes: grupoInvitados.lider.acompanantes === null ? numAcompanantes : undefined,
         }),
       })
 

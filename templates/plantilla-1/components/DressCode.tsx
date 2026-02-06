@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import Section from './Section'
 import Image from 'next/image'
 import GeometricBackground from './GeometricBackground'
@@ -18,7 +18,7 @@ interface FloatingElement {
 }
 
 export default function DressCode() {
-  const { config } = useInvitacionConfig()
+  const config = invitacionConfig
   const [floatingElements, setFloatingElements] = useState<FloatingElement[]>([])
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -35,13 +35,14 @@ export default function DressCode() {
     setFloatingElements(elements)
   }, [])
 
-  // Usar dressCodeDetails si está disponible, sino parsear desde description
-  const mainDescription = config.dressCodeDescription || ''
-  const detailedPoints = config.dressCodeDetails 
-    ? config.dressCodeDetails.split('\n').filter(point => point.trim().length > 0).map(point => point.trim())
-    : (config.dressCodeDescription.includes('.') 
-        ? config.dressCodeDescription.split('.').filter(point => point.trim().length > 0).slice(1).map(point => point.trim())
-        : [])
+  // Parse descripción en puntos
+  const descriptionPoints = config.dressCodeDescription
+    .split('.')
+    .filter(point => point.trim().length > 0)
+    .map(point => point.trim())
+
+  const mainDescription = descriptionPoints[0] || config.dressCodeDescription
+  const detailedPoints = descriptionPoints.slice(1)
 
   return (
     <Section id="dresscode" className="bg-gradient-to-b from-white/60 via-[#FFF9F0]/50 to-white/60 py-16 md:py-24 relative overflow-hidden">
@@ -224,26 +225,19 @@ export default function DressCode() {
               </div>
 
               {/* Image */}
-              {config.dressCodeImagePath && (
-                <div className="relative w-72 h-96 md:w-80 md:h-[28rem] bg-gray-100 rounded overflow-hidden">
-                  <Image
-                    src={config.dressCodeImagePath}
-                    alt="Código de vestimenta"
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 288px, 320px"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                    }}
-                  />
-                </div>
-              )}
-              {!config.dressCodeImagePath && (
-                <div className="relative w-72 h-96 md:w-80 md:h-[28rem] bg-gradient-to-br from-gray-100 to-gray-200 rounded flex items-center justify-center">
-                  <p className="text-gray-400 text-sm">Sin imagen</p>
-                </div>
-              )}
+              <div className="relative w-72 h-96 md:w-80 md:h-[28rem] bg-gray-100 rounded overflow-hidden">
+                <Image
+                  src={config.dressCodeImagePath}
+                  alt="Código de vestimenta"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 288px, 320px"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
+                />
+              </div>
 
               {/* Polaroid caption */}
               <div className="mt-4 text-center flex items-center justify-center gap-2">

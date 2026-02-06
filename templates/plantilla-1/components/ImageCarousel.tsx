@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import ExternalImage from './ExternalImage'
 
 interface ImageCarouselProps {
   images: Array<{ src: string; alt: string }>
@@ -163,7 +162,7 @@ export default function ImageCarousel({
                   }}
                   whileHover={isCenter ? { scale: style.scale * 1.05 } : {}}
                 >
-                  <ExternalImage
+                  <Image
                     src={images[imageIndex].src}
                     alt={images[imageIndex].alt}
                     fill

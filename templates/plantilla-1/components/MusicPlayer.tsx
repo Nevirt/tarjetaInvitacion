@@ -11,19 +11,6 @@ export default function MusicPlayer({ musicUrl }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const audioRef = useRef<HTMLAudioElement>(null)
-  
-  // Construir URL completa si es relativa
-  const getAudioUrl = () => {
-    if (!musicUrl) return '';
-    if (musicUrl.startsWith('http')) return musicUrl;
-    if (musicUrl.startsWith('/uploads/')) {
-      // Archivo subido al backend
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5137';
-      return `${apiUrl}${musicUrl}`;
-    }
-    // Archivo estático del frontend
-    return musicUrl;
-  }
 
   useEffect(() => {
     // Asegurar que el audio esté muteado inicialmente
@@ -59,7 +46,7 @@ export default function MusicPlayer({ musicUrl }: MusicPlayerProps) {
 
   return (
     <div className="fixed bottom-6 right-6 z-40">
-      <audio ref={audioRef} src={getAudioUrl()} loop />
+      <audio ref={audioRef} src={musicUrl} loop />
       
       <motion.button
         initial={{ scale: 0 }}

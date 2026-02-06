@@ -99,13 +99,13 @@
   /* Animación shimmer para el efecto de brillo deslizante */
   @keyframes shimmer {
     0% {
-      transform: translateX(-100%) skewX(-15deg);
+      background-position: -200% center;
     }
     100% {
-      transform: translateX(200%) skewX(-15deg);
+      background-position: 200% center;
     }
   }
-  
+
   .shimmer-effect {
     animation: shimmer 3s infinite;
   }

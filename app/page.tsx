@@ -36,7 +36,14 @@ export default function Home() {
 
       <LocationSection />
 
-      <RsvpSection />
+      {/* Esta página es solo para desarrollo - En producción usa /[slug] */}
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Modo Desarrollo</h1>
+          <p className="text-gray-600 mb-4">Esta página usa configuración estática.</p>
+          <p className="text-sm text-gray-500">Para ver invitaciones dinámicas, usa: /[slug]</p>
+        </div>
+      </div>
 
       {/* Footer - sin decoraciones */}
       <Footer />

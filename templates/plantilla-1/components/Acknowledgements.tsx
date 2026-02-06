@@ -2,19 +2,13 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useState } from 'react'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import Section from './Section'
 import AnimatedGoldenFrame from './AnimatedGoldenFrame'
 import GeometricBackground from './GeometricBackground'
-import ImageCarousel from './ImageCarousel'
-import ImageGalleryModal from './ImageGalleryModal'
 
 export default function Acknowledgements() {
-  const { config } = useInvitacionConfig()
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [selectedGallery, setSelectedGallery] = useState<string[]>([])
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const config = invitacionConfig
 
   return (
     <Section id="acknowledgements" className="bg-gradient-to-b from-white/50 via-white/70 to-white/50 py-16 md:py-24 overflow-x-hidden relative">
@@ -107,77 +101,19 @@ export default function Acknowledgements() {
           {config.acknowledgementsTitle}
         </motion.h2>
 
-        {/* Agradecimientos normales (desde el admin) */}
-        {config.acknowledgements && config.acknowledgements.length > 0 && (
-          <div className="space-y-8 md:space-y-12 mb-16 md:mb-20">
-            {config.acknowledgements.map((acknowledgement, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="max-w-4xl mx-auto"
-              >
-                <AnimatedGoldenFrame
-                  text={acknowledgement}
-                  variant={(index % 3 + 1) as 1 | 2 | 3}
-                  delay={index * 0.2}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
-
         {/* Agradecimientos especiales con marcos profesionales y modernos */}
         {config.specialAcknowledgements && config.specialAcknowledgements.length > 0 && (
           <div className="space-y-12 md:space-y-16 lg:space-y-20 mb-16 md:mb-20">
-            {config.specialAcknowledgements.map((acknowledgement, index) => {
-              const images = acknowledgement.images && acknowledgement.images.length > 0
-                ? acknowledgement.images.map(url => ({ src: url, alt: acknowledgement.text }))
-                : []
-              
-              return (
-                <motion.div
-                  key={`special-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.2 }}
-                  className="max-w-4xl mx-auto space-y-6"
-                >
-                  <AnimatedGoldenFrame
-                    text={acknowledgement.text}
-                    variant={(index % 3 + 1) as 1 | 2 | 3}
-                    delay={index * 0.2}
-                  />
-                  {images.length > 0 && (
-                    <div className="mt-8">
-                      <ImageCarousel
-                        images={images}
-                        onImageClick={(imgIndex) => {
-                          setSelectedImageIndex(imgIndex)
-                          setSelectedGallery(images.map(img => img.src))
-                          setIsModalOpen(true)
-                        }}
-                        autoPlay={true}
-                        autoPlayInterval={5000}
-                      />
-                    </div>
-                  )}
-                </motion.div>
-              )
-            })}
+            {config.specialAcknowledgements.map((acknowledgement, index) => (
+              <AnimatedGoldenFrame
+                key={index}
+                text={acknowledgement.text}
+                variant={(index % 3 + 1) as 1 | 2 | 3}
+                delay={index * 0.2}
+              />
+            ))}
           </div>
         )}
-        
-        {/* Modal de galería */}
-        <ImageGalleryModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          images={selectedGallery}
-          initialIndex={selectedImageIndex}
-        />
       </div>
     </Section>
   )

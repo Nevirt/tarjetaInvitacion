@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useInvitacionConfig } from '@/contexts/InvitacionConfigContext'
+import { invitacionConfig } from '../config/invitacion'
 import Section from './Section'
 import GeometricBackground from './GeometricBackground'
 
@@ -18,7 +18,7 @@ interface FloatingIcon {
 }
 
 export default function LocationSection() {
-  const { config } = useInvitacionConfig()
+  const config = invitacionConfig
   const [floatingIcons, setFloatingIcons] = useState<FloatingIcon[]>([])
   const [isHoveringMap, setIsHoveringMap] = useState(false)
 
@@ -198,7 +198,7 @@ export default function LocationSection() {
           viewport={{ once: true }}
           className="text-4xl md:text-5xl font-serif text-text-primary text-center mb-12 md:mb-16"
         >
-          {config.locationTitle || 'Ubicación'}
+          Ubicación
         </motion.h2>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
@@ -246,7 +246,7 @@ export default function LocationSection() {
                         {config.eventLocationName}
                       </h3>
                       <p className="text-text-primary font-sans text-base md:text-lg leading-relaxed">
-                        {config.locationAddress || config.eventAddress}
+                        {config.eventAddress}
                       </p>
                     </div>
                   </div>
