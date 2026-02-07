@@ -8,59 +8,71 @@ export interface InvitacionConfig {
   rsvpDeadlineDateTime?: string;
   eventLocationName: string;
   eventAddress: string;
-  
+
   // Ubicación
   locationTitle?: string;
   locationAddress?: string;
-  
+
   // Google Maps
   googleMapsEmbedUrl?: string;
   googleMapsPlaceUrl?: string;
-  
+
   // Footer
   footerText?: string;
-  
+
   // Código de vestimenta
   dressCodeTitle: string;
   dressCodeDescription: string;
   dressCodeImagePath?: string;
   dressCodeDetails?: string;
-  
+
   // Música de fondo
   musicUrl?: string;
-  
+
   // Agradecimientos
   acknowledgementsTitle: string;
   acknowledgements: string[];
   specialAcknowledgements?: Array<{ text: string; images?: string[] }>;
-  
+
   // Personalización visual
   primaryColor?: string;
   accentColor?: string;
   backgroundColor?: string;
   textColor?: string;
-  
+
   // Tipografía
   headingFont?: string;
   bodyFont?: string;
   decorativeFont?: string;
-  
+
   // Mensajes
   countdownExpiredMessage?: string;
   rsvpSuccessMessage?: string;
-  
+
   // Número destacado
   featuredNumber?: string;
-  
+
   // Efectos visuales
   enableParticles?: boolean;
   enablePetals?: boolean;
   enableGlitter?: boolean;
-  
+
   // Imágenes
   heroImageUrl?: string;
   galleryImages?: string[];
-  
+
+  // Elementos visuales por sector
+  elements?: {
+    hero?: {
+      showFlowerTopLeft?: boolean;
+      showFlowerBottomLeft?: boolean;
+      showFlowerTopRight?: boolean;
+      showGoldenFrame?: boolean;
+      showGoldenDivider?: boolean;
+      showBubbles?: boolean;
+    };
+  };
+
   // Visibilidad de secciones
   showHero?: boolean;
   showCountdown?: boolean;
@@ -73,7 +85,7 @@ export interface InvitacionConfig {
 
 export function parseConfigFromEvento(evento: any): InvitacionConfig {
   let config: Partial<InvitacionConfig> = {};
-  
+
   // Parse JSON configuracion if exists
   if (evento.configuracion) {
     try {
@@ -82,7 +94,7 @@ export function parseConfigFromEvento(evento: any): InvitacionConfig {
       console.error('Error parsing configuracion:', e);
     }
   }
-  
+
   // Merge with evento data
   const eventDate = new Date(evento.fechaEvento);
   // horaEvento puede venir como "HH:mm" string o como objeto TimeSpan
@@ -96,7 +108,7 @@ export function parseConfigFromEvento(evento: any): InvitacionConfig {
     minutes = evento.horaEvento.minutes || 0;
   }
   eventDate.setHours(hours, minutes);
-  
+
   return {
     honoreeName: config.honoreeName || evento.titulo,
     eventTitle: config.eventTitle || evento.titulo,
@@ -139,6 +151,7 @@ export function parseConfigFromEvento(evento: any): InvitacionConfig {
     showLocation: config.showLocation !== false,
     showRsvp: config.showRsvp !== false,
     showFooter: config.showFooter !== false,
+    elements: config.elements,
   };
 }
 
